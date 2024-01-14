@@ -16,7 +16,7 @@
 class ChunkManager {
 public:
 	ChunkManager() {}
-	
+	short GetBlock(int x, int y, int, Chunk* c);
 	ChunkManager(int vRange, glm::vec3 worldCenterPos, Texture tex,FastNoiseLite noiseGenerator);
 	static Chunk* GetChunk(ChunkPosition cpos);
 	static Chunk* GetChunkUnloaded(ChunkPosition cpos);

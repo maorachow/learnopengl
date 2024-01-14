@@ -18,7 +18,15 @@ public:
 	bool isGrounded;
 	Player(glm::vec3 pos, float sizeX, float sizeY, float sizeZ);
 	void ProcessKeyboard(glm::vec2 moveDir, float dt);
-	float moveSpeed = 25.0f;
+	float moveSpeed = 10.0f;
 	Mesh playerMesh;
+	Chunk* curChunk;
+	bool CheckIsInChunk(Chunk* c);
+	bool isNeededUpdatingWorld;
+	void UpdatePlayerChunk();
+	void ApplyGravity(float dt);
+	float curGravityValue;
+	void Jump();
+	
 };
 

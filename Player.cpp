@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <algorithm>
 void Player::GetBlocksAround(AxisAlignedBB aabb) {
     int minX = AxisAlignedBB::floorFloat(aabb.getMinX() - 0.1f);
     int minY = AxisAlignedBB::floorFloat(aabb.getMinY() - 0.1f);
@@ -40,6 +41,13 @@ void Player::Move(float dx, float dy, float dz) {
         dy =blocksAround[i].calculateYOffset(playerBound, dy);
     }
 
+    if (movY != dy) {
+        isGrounded = true;
+
+    }
+    else {
+        isGrounded = false;
+    }
     playerBound = *playerBound.offset(0, dy, 0);
 
     //      bool fallingFlag = (this.onGround || (dy != movY && movY < 0));
@@ -58,8 +66,17 @@ void Player::Move(float dx, float dy, float dz) {
     playerPos = glm::vec3((playerBound.getMaxX() + playerBound.getMinX()) / 2, (playerBound.getMinY() + playerBound.getMaxY()) / 2+0.6f, (playerBound.getMinZ() + playerBound.getMaxZ()) / 2);
     cam.Position = playerPos;
 }
-void Player::ApplyGravity() {
 
+void Player::ApplyGravity(float dt) {
+    curGravityValue += dt * -9.8f;
+    Move(0.0f, curGravityValue*dt, 0.0f);
+    curGravityValue = glm::clamp(curGravityValue, -10.0f, 10.0f);
+}
+void Player::Jump() {
+    if (isGrounded == true) {
+curGravityValue =5.0f;
+    }
+    
 }
 Player::Player(glm::vec3 pos, float sizeX, float sizeY, float sizeZ) {
     this->playerBound = AxisAlignedBB(pos.x, pos.y, pos.z, pos.x + sizeX, pos.y + sizeY, pos.z + sizeZ);
@@ -73,9 +90,27 @@ void Player::ProcessKeyboard(glm::vec2 dir, float deltaTime)
     float velocity = moveSpeed * deltaTime;
     glm::vec2 finalMoveVec = dir * velocity;
     if (finalMoveVec.x != 0.0f)
-         this-> Move(((cam.Front * finalMoveVec.x).x), (cam.Front * finalMoveVec.x).y,(cam.Front * finalMoveVec.x).z);
+         this-> Move(((cam.Front * finalMoveVec.x).x), 0,(cam.Front * finalMoveVec.x).z);
 
 
     if (finalMoveVec.y != 0.0f)
-        this->Move((cam.Right * finalMoveVec.y).x, (cam.Right * finalMoveVec.y).y, (cam.Right * finalMoveVec.y).z);
+        this->Move((cam.Right * finalMoveVec.y).x,0, (cam.Right * finalMoveVec.y).z);
+}
+bool Player::CheckIsInChunk(Chunk* c) {
+    if (c == NULL) {
+        return false;
+    }
+    glm::vec3 playerSpacePos = playerPos - glm::vec3(c->chunkPos.x, 0, c->chunkPos.y);
+    if (playerSpacePos.x<0 || playerSpacePos.z<0 || playerSpacePos.x>CHUNKWIDTH || playerSpacePos.z>CHUNKWIDTH) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+void Player::UpdatePlayerChunk() {
+    if (!CheckIsInChunk(curChunk)) {
+        curChunk = ChunkManager::GetChunk(ChunkManager::Vec3ToChunkPos(playerPos));
+        isNeededUpdatingWorld = true;
+    }
 }
