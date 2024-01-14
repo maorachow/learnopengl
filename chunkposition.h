@@ -14,23 +14,17 @@ public:
 
 	bool operator < (const ChunkPosition a) const
 	{
-		if (x  < a.x ) {
-			return true;
-		}
-		else {
+		
 		return false;
-		}
-			
+		
+		
 		
 	}
 	bool operator>(const ChunkPosition a) const
 	{
-		if (y < + a.y) {
-			return false;
-		}
-		else {
+		
 			return true;
-		}
+		
 
 
 	}
@@ -46,8 +40,3 @@ public:
 };
 const int CHUNKWIDTH = 16;
 const int CHUNKHEIGHT = 256;
-enum BlockID {
-	Air = 0,
-	Dirt = 1,
-	Stone = 2
-};

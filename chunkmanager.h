@@ -12,16 +12,20 @@
 #include "chunk.h"
 #include "shader.cpp"
 #include <FastNoiseLite.h>
+#include <BS_thread_pool.hpp>
 class ChunkManager {
 public:
 	ChunkManager() {}
+	
 	ChunkManager(int vRange, glm::vec3 worldCenterPos, Texture tex,FastNoiseLite noiseGenerator);
 	static Chunk* GetChunk(ChunkPosition cpos);
+	static Chunk* GetChunkUnloaded(ChunkPosition cpos);
 	glm::vec3 worldCenterPos;
 	FastNoiseLite noiseGenerator;
-	int viewRange = 64;
+	int viewRange = 256;
 	Texture tex;
 	static std::vector<Chunk*> Chunks;
+	static std::vector<Chunk*> ChunksUnloaded;
 	static ChunkPosition Vec3ToChunkPos(glm::vec3 pos);
 	void RebuildAllChunks();
 	void UpdateWorld();

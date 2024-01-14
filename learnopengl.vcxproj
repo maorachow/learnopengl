@@ -136,8 +136,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="chunk.h" />
+    <ClInclude Include="ChunkBlocksDic.h" />
     <ClInclude Include="chunkmanager.cpp" />
     <ClInclude Include="chunkmanager.h" />
+    <ClInclude Include="include\BS_thread_pool.hpp" />
     <ClInclude Include="include\FastNoiseLite.h" />
     <ClInclude Include="include\glad\glad.h" />
     <ClInclude Include="include\GLFW\glfw3.h" />
@@ -155,6 +157,7 @@
     <ClCompile Include="AABB.h" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="chunk.cpp" />
+    <ClCompile Include="ChunkBlocksDic.cpp" />
     <ClCompile Include="chunkposition.h" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="glad.c" />

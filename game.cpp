@@ -45,7 +45,8 @@ public:
 		//c = Chunk(0, 0, GetTexture("terrain"));
 		cm = ChunkManager(64, glm::vec3(0.0f), GetTexture("terrain"), noiseGenerator);
 		glEnable(GL_DEPTH_TEST);
-
+		//std::thread updateWorldThread = std::thread([&]() {while (1) { cm.UpdateWorld(); } });
+		//updateWorldThread.detach();
 	}
 	void ProcessInput(GLFWwindow* window,float dt) {
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -78,7 +79,7 @@ public:
 		glm::mat4 projection = glm::mat4(1.0f);
 		projection = glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 50000.0f);
 	
-		std::cout << player.playerPos.x << " " << player.playerPos.y << " " << player.playerPos.z << std::endl;
+	//	std::cout << player.playerPos.x << " " << player.playerPos.y << " " << player.playerPos.z << std::endl;
 	//	std::cout << player.cam.Position.x << " " << player.cam.Position.y << " " << player.cam.Position.z << std::endl;
 	
 		// pass transformation matrices to the shader
@@ -121,6 +122,7 @@ public:
 		}
 	}
 	 void LoadTexture(const char* path, std::string name) {
+		stbi_set_flip_vertically_on_load(true);
 		int width, height, nrChannels;
 		unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
 		unsigned int texture;

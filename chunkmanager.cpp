@@ -5,12 +5,13 @@
 
 
 
-
+BS::thread_pool pool = BS::thread_pool();
 ChunkManager::ChunkManager(int vRange, glm::vec3 worldCenterPos, Texture tex, FastNoiseLite noiseGenerator) {
 	this->viewRange = vRange;
 	this->worldCenterPos = worldCenterPos;
 	this->tex = tex;
 	this->noiseGenerator = noiseGenerator;
+
 }
 
 
@@ -18,6 +19,15 @@ Chunk* ChunkManager::GetChunk(ChunkPosition cpos) {
 	//std::cout << Chunks.count(cpos) << std::endl;
 	for (int i = 0; i < Chunks.size(); i++) {
 		if (Chunks[i]->chunkPos == cpos) {
+			return Chunks[i];
+		}
+	}
+	return NULL;
+}
+Chunk* ChunkManager::GetChunkUnloaded(ChunkPosition cpos) {
+	//std::cout << Chunks.count(cpos) << std::endl;
+	for (int i = 0; i < ChunksUnloaded.size(); i++) {
+		if (ChunksUnloaded[i]->chunkPos == cpos) {
 			return Chunks[i];
 		}
 	}
@@ -47,10 +57,14 @@ void ChunkManager::UpdateWorld() {
 			glm::vec3 pos = glm::vec3(x, 0, z);
 			ChunkPosition cPos = Vec3ToChunkPos(pos);
 
-			Chunk* c = GetChunk(cPos);//not null
+			Chunk* c = GetChunk(cPos);
+			
 			if (c == NULL) {
+				
 				c = new Chunk(cPos.x, cPos.y, tex, &noiseGenerator);
 				Chunks.push_back(c);
+			//	pool.submit_task([=] { c->BuildChunkTask(); });
+				
 				//	std::cout << "genChunk:" << cPos.x << " " << cPos.y << std::endl;
 			}
 

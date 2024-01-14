@@ -14,6 +14,7 @@
 #include <FastNoiseLite.h>
 class Chunk {
 public:
+	bool isChunkBuildCompleted = false;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	Texture texture;
@@ -28,11 +29,12 @@ public:
 	float thisHeightMap[CHUNKWIDTH + 2][CHUNKWIDTH + 2];
 	void GenerateHeightmap();
 	Chunk() {}
+	void BuildChunkTask();
 	Chunk(int posX, int posY, Texture tex,FastNoiseLite* noiseGen);
 	void InitMap();
 	void BuildMesh();
 	void BuildBlock(int x, int y, int z, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices);
-	void BuildFace(int blockID, glm::vec3 corner, glm::vec3 up, glm::vec3 right, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices);
+	void BuildFace(int blockID, glm::vec3 corner, glm::vec3 up, glm::vec3 right, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices,int side);
 	short GetBlockType(int x, int y, int z);
 	bool CheckNeedBuildFace(int x, int y, int z);
 	bool CheckisInView(glm::vec3 position, glm::vec3 normal);

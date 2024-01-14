@@ -18,7 +18,7 @@ public:
 	bool isGrounded;
 	Player(glm::vec3 pos, float sizeX, float sizeY, float sizeZ);
 	void ProcessKeyboard(glm::vec2 moveDir, float dt);
-	float moveSpeed = 5.0f;
+	float moveSpeed = 25.0f;
 	Mesh playerMesh;
 };
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "game.cpp"
 std::vector<Chunk*> ChunkManager::Chunks = std::vector<Chunk*>{};
+std::vector<Chunk*> ChunkManager::ChunksUnloaded = std::vector<Chunk*>{};
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);

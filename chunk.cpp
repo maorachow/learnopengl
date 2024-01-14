@@ -5,13 +5,14 @@
 #include "chunkmanager.h"
 #include <FastNoiseLite.h>
 #include "chunkmanager.cpp"
-
-
+#include "ChunkBlocksDic.h"
+#include <thread>
+#include <mutex>
 	//static std::vector < Chunk>Chunks;//¾²Ì¬map
 	void Chunk::GenerateHeightmap() {
 		for (int x = 0;x < CHUNKWIDTH + 2; x++) {
 			for (int z = 0; z < CHUNKWIDTH + 2; z++) {
-				float noiseValue= noiseGenerator->GetNoise(-1+(float)chunkPos.x + (float)x, - 1+ (float)chunkPos.y + (float)z);
+				float noiseValue= noiseGenerator->GetNoise(-1.0f+(float)chunkPos.x + (float)x,  -1.0f+(float)chunkPos.y + (float)z);
 				thisHeightMap[x][z] = noiseValue;
 			}
 		}
@@ -21,43 +22,59 @@
 		chunkPos = ChunkPosition(posX,posY);
 		this->noiseGenerator = noiseGen;
 		this->texture = tex;
+	//	std::thread t([&]() {InitMap(); });
+		//
 		InitMap();
 	}
+	void Chunk::BuildChunkTask() {
+		
+		
+		
+		ChunkManager::Chunks.push_back(this);
+	}
 	void Chunk::InitMap() {
-		GenerateHeightmap();
+			GenerateHeightmap();
+	
 		for (int x = 0; x < CHUNKWIDTH; x++) {
-			for (int y = 0; y < CHUNKHEIGHT ; y++) {
+			for (int y = 0; y < CHUNKHEIGHT; y++) {
 				for (int z = 0; z < CHUNKWIDTH; z++) {
 					map[x][y][z] = 0;
 				}
 			}
 		}
 		for (int x = 0; x < CHUNKWIDTH; x++) {
-			for (int z = 0; z < CHUNKWIDTH ; z++) {
-				float noiseValue = thisHeightMap[x+1][z+1];
-			//	std::cout << noiseValue << std::endl;
-				for (int y =CHUNKHEIGHT-1; y >=0; y--) {
+			for (int z = 0; z < CHUNKWIDTH; z++) {
+				float noiseValue = thisHeightMap[x + 1][z + 1];
+				//	std::cout << noiseValue << std::endl;W
+				for (int y = CHUNKHEIGHT - 1; y >= 0; y--) {
 					if (y < (float)CHUNKHEIGHT / 4.0f + 20.0f * noiseValue) {
 						map[x][y][z] = 1;
-					}
-					
-				}
-			}
-		}
-		for (int x = 0; x < CHUNKWIDTH; x++) {
-			for (int z = 0; z < CHUNKWIDTH; z++) {
-			
-				for (int y = CHUNKHEIGHT - 1; y >= 0; y--) {
-					if (map[x][y][z] == 1 && map[x][y + 1][z] == 0) {
-						map[x][y][z] =2;
 					}
 
 				}
 			}
 		}
-		BuildMesh();
+		for (int x = 0; x < CHUNKWIDTH; x++) {
+			for (int z = 0; z < CHUNKWIDTH; z++) {
+
+				for (int y = CHUNKHEIGHT - 1; y >= 0; y--) {
+					if (map[x][y][z] == 1 && map[x][y + 1][z] == 0) {
+						map[x][y][z] = 4;
+					}
+
+				}
+			}
+		}
+		
+		//
+
+		BuildMesh(); 
+		isChunkBuildCompleted = true;
+		
+	//	t.join();
 	} 
-	void Chunk::BuildMesh() {
+
+	 void Chunk::BuildMesh() {
 		leftChunk = ChunkManager::GetChunk(ChunkPosition(chunkPos.x - CHUNKWIDTH, chunkPos.y));
 		rightChunk = ChunkManager::GetChunk(ChunkPosition(chunkPos.x + CHUNKWIDTH, chunkPos.y));
 		frontChunk = ChunkManager::GetChunk(ChunkPosition(chunkPos.x, chunkPos.y + CHUNKWIDTH));
@@ -75,41 +92,41 @@
 				}
 			}
 		}
-	//	std::cout << vertices.size() << std::endl;
+		//std::cout << vertices.size() << std::endl;
 	//	std::cout << indices.size() << std::endl;
 		if (vertices.size() > 0 && indices.size() > 0) {
-		chunkMesh = Mesh(vertices, indices, std::vector<Texture>{texture});
+		this->chunkMesh = Mesh(vertices, indices, std::vector<Texture>{texture});
 		}
 		
 	}
 	void Chunk::BuildBlock(int x, int y, int z, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices) {
-		if (map[x] [y][ z] == Air) return;
+		if (map[x] [y][ z] == 0) return;
 
 		int blockID = map[x][y][z];
 
 		//Left
 		if (CheckNeedBuildFace(x - 1, y, z))
 		//	std::cout << "buildFace" << std::endl;
-			BuildFace(blockID, glm:: vec3(x, y, z), glm::vec3(0,1,0), glm::vec3(0,0,1), vertices,indices);
+			BuildFace(blockID, glm:: vec3(x, y, z), glm::vec3(0,1,0), glm::vec3(0,0,1), vertices,indices,0);
 		//Right
 		if (CheckNeedBuildFace(x + 1, y, z))
-			BuildFace(blockID, glm::vec3(x + 1, y, z), glm::vec3(0, 1, 0), glm::vec3(0,0,1), vertices, indices);
+			BuildFace(blockID, glm::vec3(x + 1, y, z), glm::vec3(0, 1, 0), glm::vec3(0,0,1), vertices, indices,1);
 
 		//Bottom
 		if (CheckNeedBuildFace(x, y - 1, z))
-			BuildFace(blockID, glm::vec3(x, y, z), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), vertices, indices);
+			BuildFace(blockID, glm::vec3(x, y, z), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), vertices, indices,2);
 		//Top
 		if (CheckNeedBuildFace(x, y + 1, z))
-			BuildFace(blockID, glm::vec3(x, y + 1, z), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), vertices, indices);
+			BuildFace(blockID, glm::vec3(x, y + 1, z), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), vertices, indices,3);
 
 		//Back
 		if (CheckNeedBuildFace(x, y, z - 1))
-			BuildFace(blockID, glm::vec3(x, y, z), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), vertices, indices);
+			BuildFace(blockID, glm::vec3(x, y, z), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), vertices, indices,4);
 		//Front
 		if (CheckNeedBuildFace(x, y, z + 1))
-			BuildFace(blockID, glm::vec3(x, y, z + 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), vertices, indices);
+			BuildFace(blockID, glm::vec3(x, y, z + 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), vertices, indices,5);
 	}
-	void Chunk::BuildFace(int blockID, glm::vec3 corner, glm::vec3 up, glm::vec3 right, std::vector<Vertex>* vertices,std::vector<unsigned int>* indices) {
+	void Chunk::BuildFace(int blockID, glm::vec3 corner, glm::vec3 up, glm::vec3 right, std::vector<Vertex>* vertices,std::vector<unsigned int>* indices,int side) {
 		int index = vertices->size();
 		Vertex vert00=Vertex();
 		Vertex vert01 = Vertex();
@@ -130,9 +147,9 @@
 		//verts.Add(corner + right);
 
 		glm::vec2 uvWidth = glm::vec2(0.0625f, 0.0625f);
-		glm::vec2 uvCorner = glm::vec2(0.00f, 1.00f-0.0625f);
+		glm::vec2 uvCorner = ChunkBlocksDic::uvCoords[blockID][side];
 
-		uvCorner.x += (float)(blockID - 1) / 16.0f;
+	//	uvCorner.x += (float)(blockID - 1) / 16.0f;
 		vert00.TexCoords = uvCorner;
 		vert01.TexCoords = glm::vec2(uvCorner.x, uvCorner.y + uvWidth.y);
 		vert11.TexCoords = glm::vec2(uvCorner.x + uvWidth.x, uvCorner.y + uvWidth.y);
@@ -187,7 +204,7 @@
 		}
 	}
 	short Chunk::PredictBlockType(float noiseValue, int y) {
-		float noiseValue1 = (float) CHUNKHEIGHT/4.0f+noiseValue*20.0f-1.0f;
+		float noiseValue1 = (float) CHUNKHEIGHT/4.0f+noiseValue*20.0f-2.0f;
 		if (y < noiseValue1) {
 			return 1;
 		}
@@ -261,6 +278,10 @@
 		return result;*/
 	}
 	void Chunk::RenderChunk(glm::vec3 camPosition, glm::vec3 cameraNormal,glm::mat4 view,glm::mat4 projection,Shader shader) {
+		if (isChunkBuildCompleted == false) {
+			return;
+		}
+		
 		if (CheckisInView(camPosition,cameraNormal) == false) {
 			return;
 		}
@@ -272,7 +293,6 @@
 		shader.setMat4("model", model);
 		shader.setMat4("projection", projection); // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		shader.setMat4("view", view);
-
 		chunkMesh.Draw(shader);
 	}
 
