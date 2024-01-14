@@ -30,18 +30,7 @@ public:
 		LoadTexture("D:/learnopengl/shaders/awesomeface.png", "face");
 		LoadTexture("D:/learnopengl/shaders/terrain.png", "terrain");
 		curShader = GetShader("simpleshader");
-		cubeMesh = Mesh(std::vector<Vertex>{
-			Vertex{ glm::vec3(-0.5f, -0.5f, -0.5f),glm::vec3(0.0f,  0.0f, -1.0f),glm::vec2(0.0f, 0.0f) },
-				Vertex{ glm::vec3(0.5f, -0.5f, -0.5f),glm::vec3(0.0f,  0.0f, -1.0f),glm::vec2(1.0f, 0.0f) },
-				Vertex{ glm::vec3(0.5f,  0.5f, -0.5f),glm::vec3(0.0f,  0.0f, -1.0f),glm::vec2(1.0f, 1.0f) },
-				Vertex{ glm::vec3(0.5f,  0.5f, -0.5f),glm::vec3(0.0f,  0.0f, -1.0f),glm::vec2(1.0f, 1.0f) },
-				Vertex{ glm::vec3(-0.5f,  0.5f, -0.5f),glm::vec3(0.0f,  0.0f, -1.0f),glm::vec2(0.0f, 1.0f) },
-				Vertex{ glm::vec3(-0.5f, -0.5f, -0.5f),glm::vec3(0.0f,  0.0f, -1.0f),glm::vec2(0.0f, 0.0f) },
-
-			
-		}, std::vector<unsigned int>{
-			0, 1, 2, 3, 4, 5
-		}, std::vector<Texture>{GetTexture("terrain")});
+		
 		//c = Chunk(0, 0, GetTexture("terrain"));
 		cm = ChunkManager(64, glm::vec3(0.0f), GetTexture("terrain"), noiseGenerator);
 		glEnable(GL_DEPTH_TEST);
@@ -92,7 +81,13 @@ public:
 		//c.RenderChunk(view, projection, curShader);
 	//	std::cout << mainCam.Position.x <<" " << mainCam.Position.y << " " << mainCam.Position.z << std::endl;
 		cm.worldCenterPos = player.cam.Position;
-		cm.UpdateWorld();
+		//cm.UpdateWorld();
+		player.UpdatePlayerChunk();
+		if (player.isNeededUpdatingWorld == true) {
+			cm.UpdateWorld();
+			std::cout << "update" << std::endl;
+			player.isNeededUpdatingWorld = false;
+		}
 		cm.RenderAllChunks(player.cam.Position, player.cam.Front,view, projection, curShader);
 	}
 	 std::map<std::string, Texture> allTextures;

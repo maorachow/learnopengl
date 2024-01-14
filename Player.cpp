@@ -79,3 +79,21 @@ void Player::ProcessKeyboard(glm::vec2 dir, float deltaTime)
     if (finalMoveVec.y != 0.0f)
         this->Move((cam.Right * finalMoveVec.y).x, (cam.Right * finalMoveVec.y).y, (cam.Right * finalMoveVec.y).z);
 }
+bool Player::CheckIsInChunk(Chunk* c) {
+    if (c == NULL) {
+        return false;
+    }
+    glm::vec3 playerSpacePos = playerPos - glm::vec3(c->chunkPos.x, 0, c->chunkPos.y);
+    if (playerSpacePos.x<0 || playerSpacePos.z<0 || playerSpacePos.x>CHUNKWIDTH || playerSpacePos.z>CHUNKWIDTH) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+void Player::UpdatePlayerChunk() {
+    if (!CheckIsInChunk(curChunk)) {
+        curChunk = ChunkManager::GetChunk(ChunkManager::Vec3ToChunkPos(playerPos));
+        isNeededUpdatingWorld = true;
+    }
+}

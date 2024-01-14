@@ -20,5 +20,9 @@ public:
 	void ProcessKeyboard(glm::vec2 moveDir, float dt);
 	float moveSpeed = 25.0f;
 	Mesh playerMesh;
+	Chunk* curChunk;
+	bool CheckIsInChunk(Chunk* c);
+	bool isNeededUpdatingWorld;
+	void UpdatePlayerChunk();
 };
 
