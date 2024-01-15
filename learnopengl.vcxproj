@@ -77,6 +77,9 @@
     <SourcePath>D:\learnopengl\learnopengl\src;D:\learnopengl\learnopengl;$(SourcePath)</SourcePath>
     <ExternalIncludePath>D:\learnopengl\learnopengl\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -137,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="chunk.h" />
     <ClInclude Include="ChunkBlocksDic.h" />
+    <ClInclude Include="ChunkLoadingQueue.h" />
     <ClInclude Include="chunkmanager.cpp" />
     <ClInclude Include="chunkmanager.h" />
     <ClInclude Include="include\BS_thread_pool.hpp" />
@@ -158,6 +162,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="chunk.cpp" />
     <ClCompile Include="ChunkBlocksDic.cpp" />
+    <ClCompile Include="ChunkLoadingQueue.cpp" />
     <ClCompile Include="chunkposition.h" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="glad.c" />

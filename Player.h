@@ -8,6 +8,8 @@
 class Player
 {
 public:
+	glm::ivec3 playerLastIntPos;
+	glm::ivec3 playerCurIntPos;
 	Camera cam;
 	AxisAlignedBB playerBound;
 	std::vector<AxisAlignedBB> blocksAround;

@@ -15,7 +15,7 @@ public:
 	int scrWidth=800, scrHeight=600;
 	GLFWwindow* window;
 //	Camera mainCam = Camera(0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
-	Player player = Player(glm::vec3(0, 80, 0),0.6f, 1.8f,0.6f);
+	Player player = Player(glm::vec3(0, 128, 0),0.6f, 1.8f,0.6f);
 	Game(GLFWwindow* window) {
 		this->window = window;
 	}
@@ -32,10 +32,11 @@ public:
 		curShader = GetShader("simpleshader");
 		
 		//c = Chunk(0, 0, GetTexture("terrain"));
-		cm = ChunkManager(64, glm::vec3(0.0f), GetTexture("terrain"), noiseGenerator);
+		cm = ChunkManager(256, glm::vec3(0.0f), GetTexture("terrain"), noiseGenerator);
 		glEnable(GL_DEPTH_TEST);
-		//std::thread updateWorldThread = std::thread([&]() {while (1) { cm.UpdateWorld(); } });
+		//std::thread updateWorldThread = std::thread([&]() {while (1) { } });
 		//updateWorldThread.detach();
+		
 	}
 	void ProcessInput(GLFWwindow* window,float dt) {
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -59,7 +60,10 @@ public:
 		}
 	//	std::cout << mainCam.Position.s << std::endl;
 	}
-	
+	void FixedUpdate() {
+	//	
+		ChunkLoadingQueue::LoadChunkThread(GetTexture("terrain"), noiseGenerator);
+	}
 	void Render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -90,7 +94,7 @@ public:
 		player.UpdatePlayerChunk();
 		if (player.isNeededUpdatingWorld == true) {
 			cm.UpdateWorld();
-			std::cout << "update" << std::endl;
+	//		std::cout << "update" << std::endl;
 			player.isNeededUpdatingWorld = false;
 		}
 		cm.RenderAllChunks(player.cam.Position, player.cam.Front,view, projection, curShader);

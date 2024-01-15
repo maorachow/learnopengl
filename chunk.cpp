@@ -26,12 +26,7 @@
 		//
 		InitMap();
 	}
-	void Chunk::BuildChunkTask() {
-		
-		
-		
-		ChunkManager::Chunks.push_back(this);
-	}
+
 	void Chunk::InitMap() {
 			GenerateHeightmap();
 	
@@ -69,7 +64,7 @@
 		//
 
 		BuildMesh(); 
-		isChunkBuildCompleted = true;
+	
 		
 	//	t.join();
 	} 
@@ -94,11 +89,21 @@
 		}
 		//std::cout << vertices.size() << std::endl;
 	//	std::cout << indices.size() << std::endl;
-		if (vertices.size() > 0 && indices.size() > 0) {
-		this->chunkMesh = Mesh(vertices, indices, std::vector<Texture>{texture});
-		}
+		isChunkDataBuilt = true;
+	//	if (std::find(ChunkManager::Chunks.begin(), ChunkManager::Chunks.end(), this) == ChunkManager::Chunks.end()) {
+		
+		
+		
 		
 	}
+	 void Chunk::ApplyMesh() {
+		if (vertices.size() > 0 && indices.size() > 0) {
+		this->chunkMesh = Mesh(vertices, indices, std::vector<Texture>{texture});
+		isChunkBuildCompleted = true;
+
+		}
+		
+	 }
 	void Chunk::BuildBlock(int x, int y, int z, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices) {
 		if (map[x] [y][ z] == 0) return;
 
@@ -136,11 +141,11 @@
 		vert01.Position = corner + up;
 		vert11.Position = corner + up + right;
 		vert10.Position = corner + right;
-		glm::vec3 normal = glm::cross(up, right);
+		/*glm::vec3 normal = glm::cross(corner - up, corner - right);
 		vert00.Normal = normal;
 		vert01.Normal = normal;
 		vert11.Normal = normal;
-		vert10.Normal = normal;
+		vert10.Normal = normal;*/
 		//verts.Add(corner);
 		//verts.Add(corner + up);
 		//verts.Add(corner + up + right);
@@ -278,6 +283,9 @@
 		return result;*/
 	}
 	void Chunk::RenderChunk(glm::vec3 camPosition, glm::vec3 cameraNormal,glm::mat4 view,glm::mat4 projection,Shader shader) {
+		if (this == NULL) {
+			return;
+		}
 		if (isChunkBuildCompleted == false) {
 			return;
 		}
@@ -288,8 +296,9 @@
 		shader.use();
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(chunkPos.x,0,chunkPos.y));
-		shader.setVec3("lightPos", chunkPos.x+ CHUNKWIDTH/2.0f+1.0f,256.0f, chunkPos.y+ CHUNKWIDTH / 2.0f + 1.0f);
+		shader.setVec3("lightPos", camPosition);
 		shader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		shader.setVec3("viewPos",camPosition);
 		shader.setMat4("model", model);
 		shader.setMat4("projection", projection); // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		shader.setMat4("view", view);

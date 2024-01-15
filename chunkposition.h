@@ -35,6 +35,12 @@ public:
 
 	bool operator==(const ChunkPosition& other) const
 	{
+		if (&other == NULL) {
+			return false;
+		}
+		if (this == NULL && &other == NULL) {
+			return true;
+		}
 		return x == other.x && y == other.y;
 	}
 };

@@ -12,6 +12,9 @@
 #include "chunk.h"
 #include "shader.cpp"
 #include <FastNoiseLite.h>
+#include "ChunkLoadingQueue.h"
+
+#include <algorithm>
 #include <BS_thread_pool.hpp>
 class ChunkManager {
 public:

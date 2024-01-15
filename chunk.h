@@ -40,4 +40,6 @@ public:
 	bool CheckisInView(glm::vec3 position, glm::vec3 normal);
 	void RenderChunk(glm::vec3 camPosition, glm::vec3 cameraNormal, glm::mat4 view, glm::mat4 projection, Shader shader);
 	short PredictBlockType(float noiseValue, int y);
+	void ApplyMesh();
+	bool isChunkDataBuilt = false;
 };

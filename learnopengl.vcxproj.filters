@@ -30,9 +30,6 @@
     <ClInclude Include="include\glm\glm.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\glad\glad.h">
-      <Filter>源文件</Filter>
-    </ClInclude>
     <ClInclude Include="include\FastNoiseLite.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -57,6 +54,12 @@
     <ClInclude Include="include\BS_thread_pool.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ChunkLoadingQueue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\glad\glad.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\glfw3.lib">
@@ -71,9 +74,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="shader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="mesh.h">
@@ -99,6 +99,12 @@
     </ClCompile>
     <ClCompile Include="ChunkBlocksDic.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkLoadingQueue.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>头文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

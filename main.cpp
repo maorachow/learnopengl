@@ -53,6 +53,8 @@ int main()
     float deltaTime;
     float curTime;
     float lastTime=0.0f;
+    float fixedUpdateTime = 0.02f;
+    float timeToNextFixedupdate=0.0f;
     while (!glfwWindowShouldClose(window))
     {
         curTime = glfwGetTime();
@@ -60,6 +62,11 @@ int main()
         lastTime=curTime;
         // input
         // -----
+        timeToNextFixedupdate += deltaTime;
+        if (timeToNextFixedupdate > fixedUpdateTime) {
+            timeToNextFixedupdate = 0.0f;
+            game.FixedUpdate();
+        }
         game.ProcessInput(window,deltaTime);
 
         // render

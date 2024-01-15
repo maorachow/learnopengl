@@ -68,13 +68,16 @@ void Player::Move(float dx, float dy, float dz) {
 }
 
 void Player::ApplyGravity(float dt) {
+    if (curChunk == NULL) {
+        return;
+    }
     curGravityValue += dt * -9.8f;
     Move(0.0f, curGravityValue*dt, 0.0f);
     curGravityValue = glm::clamp(curGravityValue, -10.0f, 10.0f);
 }
 void Player::Jump() {
     if (isGrounded == true) {
-curGravityValue =5.0f;
+    curGravityValue =5.0f;
     }
     
 }
@@ -86,7 +89,16 @@ Player::Player(glm::vec3 pos, float sizeX, float sizeY, float sizeZ) {
 }
 void Player::ProcessKeyboard(glm::vec2 dir, float deltaTime)
 {
-    GetBlocksAround(playerBound);
+     if (curChunk == NULL) {
+        return;
+    }
+    playerCurIntPos = playerPos;
+    if (playerCurIntPos != playerLastIntPos) {
+        GetBlocksAround(playerBound);
+       // std::cout << "get" << std::endl;
+    }
+   
+    playerLastIntPos = playerCurIntPos;
     float velocity = moveSpeed * deltaTime;
     glm::vec2 finalMoveVec = dir * velocity;
     if (finalMoveVec.x != 0.0f)
@@ -109,6 +121,7 @@ bool Player::CheckIsInChunk(Chunk* c) {
     }
 }
 void Player::UpdatePlayerChunk() {
+  
     if (!CheckIsInChunk(curChunk)) {
         curChunk = ChunkManager::GetChunk(ChunkManager::Vec3ToChunkPos(playerPos));
         isNeededUpdatingWorld = true;
