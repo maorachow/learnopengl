@@ -8,9 +8,9 @@ void Player::GetBlocksAround(AxisAlignedBB aabb) {
     int maxY = AxisAlignedBB::ceilFloat(aabb.getMaxY() + 0.1f);
     int maxZ = AxisAlignedBB::ceilFloat(aabb.getMaxZ() + 0.1f);
     this->blocksAround = std::vector<AxisAlignedBB>{};
-    for (int z = minZ - 1; z <= maxZ + 1; z++) {
-        for (int x = minX - 1; x <= maxX + 1; x++) {
-            for (int y = minY - 1; y <= maxY + 1; y++) {
+    for (int z = minZ-1 ; z <= maxZ+1; z++) {
+        for (int x = minX-1 ; x <= maxX+1 ; x++) {
+            for (int y = minY-1; y <= maxY+1; y++) {
             //    std::cout << x << " " << y << " " << z << " " << std::endl;
                 int blockID =ChunkManager::GetBlock(x, y, z);
                 if (blockID > 0 && blockID < 100) {
@@ -87,7 +87,7 @@ Player::Player(glm::vec3 pos, float sizeX, float sizeY, float sizeZ) {
     this->cam = Camera(0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
     this->cam.Position = playerPos;
 }
-void Player::ProcessKeyboard(glm::vec2 dir, float deltaTime)
+void Player::ProcessKeyboard(glm::vec2 dir, float deltaTime,bool isLeftMousePressed,bool isRightMousePressed)
 {
      if (curChunk == NULL) {
         return;
@@ -107,6 +107,14 @@ void Player::ProcessKeyboard(glm::vec2 dir, float deltaTime)
 
     if (finalMoveVec.y != 0.0f)
         this->Move((cam.Right * finalMoveVec.y).x,0, (cam.Right * finalMoveVec.y).z);
+    if (isLeftMousePressed == true&&placeBlockCD<0.0f) {
+        BreakBlock();
+        placeBlockCD = 0.2f;
+    }
+    if (isRightMousePressed == true && placeBlockCD < 0.0f) {
+        PlaceBlock();
+        placeBlockCD = 0.2f;
+    }
 }
 bool Player::CheckIsInChunk(Chunk* c) {
     if (c == NULL) {
@@ -126,4 +134,26 @@ void Player::UpdatePlayerChunk() {
         curChunk = ChunkManager::GetChunk(ChunkManager::Vec3ToChunkPos(playerPos));
         isNeededUpdatingWorld = true;
     }
+}
+void Player::BreakBlock() {
+    if (placeBlockCD > 0) {
+        return;
+    }
+    Ray ray = Ray(cam.Position, cam.Front);
+    float distance = 5.0f;
+    glm::ivec3 breakBlockPos = ChunkManager::HitFirstBlock(distance, ray);
+    ChunkManager::SetBlock(breakBlockPos.x, breakBlockPos.y, breakBlockPos.z,0);
+}
+void Player::PlaceBlock() {
+    if (placeBlockCD > 0) {
+        return;
+    }
+    Ray ray = Ray(cam.Position, cam.Front);
+    float distance = 5.0f;
+    glm::vec3 breakBlockPos = ChunkManager::HitFirstPoint(distance, ray);
+    if (glm::distance(breakBlockPos ,ray.origin) > 4.8f) {
+        return;
+    }
+    glm::vec3 placeBlockPos = vec3Lerp(ray.origin, breakBlockPos, 0.94f);
+    ChunkManager::SetBlock(AxisAlignedBB::floorFloat(placeBlockPos.x), AxisAlignedBB::floorFloat(placeBlockPos.y) , AxisAlignedBB::floorFloat(placeBlockPos.z), 1);
 }

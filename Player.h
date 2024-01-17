@@ -19,7 +19,7 @@ public:
 	glm::vec3 playerPos;
 	bool isGrounded;
 	Player(glm::vec3 pos, float sizeX, float sizeY, float sizeZ);
-	void ProcessKeyboard(glm::vec2 moveDir, float dt);
+	void ProcessKeyboard(glm::vec2 moveDir, float dt, bool isLeftMousePressed,bool isRightMousePressed);
 	float moveSpeed = 10.0f;
 	Mesh playerMesh;
 	Chunk* curChunk;
@@ -29,6 +29,8 @@ public:
 	void ApplyGravity(float dt);
 	float curGravityValue;
 	void Jump();
-	
+	void BreakBlock();
+	void PlaceBlock();
+	float placeBlockCD = 0.0f;
 };
 

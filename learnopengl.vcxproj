@@ -79,6 +79,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>D:\learnopengl\learnopengl\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\learnopengl\learnopengl\include;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>D:\learnopengl\learnopengl\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -129,6 +133,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,6 +157,8 @@
     <ClInclude Include="include\KHR\khrplatform.h" />
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Ray.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="vertex.h" />
   </ItemGroup>
   <ItemGroup>
@@ -169,7 +176,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.h" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="stbimage.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

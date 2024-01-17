@@ -6,7 +6,6 @@
 
 
 
-BS::thread_pool pool = BS::thread_pool();
 ChunkManager::ChunkManager(int vRange, glm::vec3 worldCenterPos, Texture tex, FastNoiseLite noiseGenerator) {
 	this->viewRange = vRange;
 	this->worldCenterPos = worldCenterPos;
@@ -15,19 +14,49 @@ ChunkManager::ChunkManager(int vRange, glm::vec3 worldCenterPos, Texture tex, Fa
 
 }
 
-
+int ChunkManager::getChunkCalls = 0;
 Chunk* ChunkManager::GetChunk(ChunkPosition cpos) {
 	if (&cpos == NULL) {
 		return NULL;
+		
 	}
 	//std::cout << Chunks.count(cpos) << std::endl;
 	for (int i = 0; i < Chunks.size(); i++) {
 		if (&Chunks[i]->chunkPos!=NULL&&Chunks[i]->chunkPos == cpos) {
+		
 			return Chunks[i];
 		}
 	}
-
+	
 	return NULL;
+}
+void ChunkManager::SetBlock(int x,int y,int z,short value) {
+	ChunkPosition chunkPos = ChunkManager::Vec3ToChunkPos(glm::vec3(x, y, z));
+	Chunk* c = ChunkManager::GetChunk(chunkPos);
+	if (c == NULL) {
+		return;
+	}
+	glm::ivec3 chunkSpacePos = glm::ivec3(x, y, z) - glm::ivec3(chunkPos.x, 0, chunkPos.y);
+
+	c->map[chunkSpacePos.x][chunkSpacePos.y][chunkSpacePos.z]=value;
+	c->BuildMesh();
+	c->ApplyMesh();
+	if (c->leftChunk != NULL) {
+		c->leftChunk->BuildMesh();
+		c->leftChunk->ApplyMesh();
+	}
+	if (c->rightChunk != NULL) {
+		c->rightChunk->BuildMesh();
+		c->rightChunk->ApplyMesh();
+	}
+	if (c->frontChunk != NULL) {
+		c->frontChunk->BuildMesh();
+		c->frontChunk->ApplyMesh();
+	}
+	if (c->backChunk != NULL) {
+		c->backChunk->BuildMesh();
+		c->backChunk->ApplyMesh();
+	}
 }
 Chunk* ChunkManager::GetChunkUnloaded(ChunkPosition cpos) {
 	//std::cout << Chunks.count(cpos) << std::endl;
@@ -45,7 +74,9 @@ Chunk* ChunkManager::GetChunkUnloaded(ChunkPosition cpos) {
 	ChunkPosition value = ChunkPosition((int)tmp.x, (int)tmp.z);
 	return value;
 }
+
  short ChunkManager::GetBlock(int x, int y, int z) {
+	// getChunkCalls++;
 	ChunkPosition chunkPos = ChunkManager::Vec3ToChunkPos(glm::vec3(x, y, z));
 	Chunk* c = ChunkManager::GetChunk(chunkPos);
 	if (c == NULL) {
@@ -53,6 +84,7 @@ Chunk* ChunkManager::GetChunkUnloaded(ChunkPosition cpos) {
 	}
 	glm::ivec3 chunkSpacePos = glm::ivec3(x, y, z) - glm::ivec3(chunkPos.x, 0, chunkPos.y);
 	short value = c->map[chunkSpacePos.x][chunkSpacePos.y][chunkSpacePos.z];
+	
 	return value;
 }
  short ChunkManager::GetBlock(int x, int y, int z,Chunk* c) {
@@ -65,6 +97,7 @@ Chunk* ChunkManager::GetChunkUnloaded(ChunkPosition cpos) {
 	 short value = c->map[chunkSpacePos.x][chunkSpacePos.y][chunkSpacePos.z];
 	 return value;
  }
+
 void ChunkManager::UpdateWorld() {
 
 	for (int x = worldCenterPos.x - viewRange; x <= worldCenterPos.x + viewRange; x += CHUNKWIDTH) {
@@ -78,10 +111,11 @@ void ChunkManager::UpdateWorld() {
 			if (c == NULL) {
 				
 				//c = new Chunk(cPos.x, cPos.y, tex, &noiseGenerator);
-
+				ChunkLoadingQueue::mtx.lock();
 				if (std::find(ChunkLoadingQueue::loadingChunks.begin(), ChunkLoadingQueue::loadingChunks.end(), cPos) == ChunkLoadingQueue::loadingChunks.end()) {
 					ChunkLoadingQueue::loadingChunks.push_back(cPos);
-				}
+				}	
+				ChunkLoadingQueue::mtx.unlock();
 				
 		
 			}
@@ -96,7 +130,8 @@ void ChunkManager::UpdateWorld() {
 			{
 				if (*it == c) {
 					delete(c);
-				it = Chunks.erase(it);
+					it = Chunks.erase(it);
+				std::cout << "erase" << std::endl;
 				}
 				else {
 					it++;

@@ -34,7 +34,7 @@ public:
 	void InitMap();
 	void BuildMesh();
 	void BuildBlock(int x, int y, int z, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices);
-	void BuildFace(int blockID, glm::vec3 corner, glm::vec3 up, glm::vec3 right, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices,int side);
+	void BuildFace(int blockID, glm::vec3 corner, glm::vec3 up, glm::vec3 right, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices,int side,bool reversed);
 	short GetBlockType(int x, int y, int z);
 	bool CheckNeedBuildFace(int x, int y, int z);
 	bool CheckisInView(glm::vec3 position, glm::vec3 normal);
@@ -42,4 +42,5 @@ public:
 	short PredictBlockType(float noiseValue, int y);
 	void ApplyMesh();
 	bool isChunkDataBuilt = false;
+	
 };

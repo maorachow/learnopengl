@@ -12,7 +12,7 @@
 	void Chunk::GenerateHeightmap() {
 		for (int x = 0;x < CHUNKWIDTH + 2; x++) {
 			for (int z = 0; z < CHUNKWIDTH + 2; z++) {
-				float noiseValue= noiseGenerator->GetNoise(-1.0f+(float)chunkPos.x + (float)x,  -1.0f+(float)chunkPos.y + (float)z);
+				float noiseValue= noiseGenerator->GetNoise(1+(float)chunkPos.x + (float)x,  1+(float)chunkPos.y + (float)z);
 				thisHeightMap[x][z] = noiseValue;
 			}
 		}
@@ -102,6 +102,10 @@
 		isChunkBuildCompleted = true;
 
 		}
+		std::vector<unsigned int>().swap(indices);
+		std::vector<Vertex>().swap(vertices);
+		
+		//delete(&vertices);
 		
 	 }
 	void Chunk::BuildBlock(int x, int y, int z, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices) {
@@ -112,26 +116,26 @@
 		//Left
 		if (CheckNeedBuildFace(x - 1, y, z))
 		//	std::cout << "buildFace" << std::endl;
-			BuildFace(blockID, glm:: vec3(x, y, z), glm::vec3(0,1,0), glm::vec3(0,0,1), vertices,indices,0);
+			BuildFace(blockID, glm:: vec3(x, y, z), glm::vec3(0,1,0), glm::vec3(0,0,1), vertices,indices,0, false);
 		//Right
 		if (CheckNeedBuildFace(x + 1, y, z))
-			BuildFace(blockID, glm::vec3(x + 1, y, z), glm::vec3(0, 1, 0), glm::vec3(0,0,1), vertices, indices,1);
+			BuildFace(blockID, glm::vec3(x + 1, y, z), glm::vec3(0, 1, 0), glm::vec3(0,0,1), vertices, indices,1, true);
 
 		//Bottom
 		if (CheckNeedBuildFace(x, y - 1, z))
-			BuildFace(blockID, glm::vec3(x, y, z), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), vertices, indices,2);
+			BuildFace(blockID, glm::vec3(x, y, z), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), vertices, indices,2, false);
 		//Top
 		if (CheckNeedBuildFace(x, y + 1, z))
-			BuildFace(blockID, glm::vec3(x, y + 1, z), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), vertices, indices,3);
+			BuildFace(blockID, glm::vec3(x, y + 1, z), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), vertices, indices,3, true);
 
 		//Back
 		if (CheckNeedBuildFace(x, y, z - 1))
-			BuildFace(blockID, glm::vec3(x, y, z), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), vertices, indices,4);
+			BuildFace(blockID, glm::vec3(x, y, z), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), vertices, indices,4, true);
 		//Front
 		if (CheckNeedBuildFace(x, y, z + 1))
-			BuildFace(blockID, glm::vec3(x, y, z + 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), vertices, indices,5);
+			BuildFace(blockID, glm::vec3(x, y, z + 1), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0), vertices, indices,5, false);
 	}
-	void Chunk::BuildFace(int blockID, glm::vec3 corner, glm::vec3 up, glm::vec3 right, std::vector<Vertex>* vertices,std::vector<unsigned int>* indices,int side) {
+	void Chunk::BuildFace(int blockID, glm::vec3 corner, glm::vec3 up, glm::vec3 right, std::vector<Vertex>* vertices, std::vector<unsigned int>* indices, int side, bool reversed) {
 		int index = vertices->size();
 		Vertex vert00=Vertex();
 		Vertex vert01 = Vertex();
@@ -141,11 +145,11 @@
 		vert01.Position = corner + up;
 		vert11.Position = corner + up + right;
 		vert10.Position = corner + right;
-		/*glm::vec3 normal = glm::cross(corner - up, corner - right);
+		glm::vec3 normal = glm::cross(up, right);
 		vert00.Normal = normal;
 		vert01.Normal = normal;
 		vert11.Normal = normal;
-		vert10.Normal = normal;*/
+		vert10.Normal = normal;
 		//verts.Add(corner);
 		//verts.Add(corner + up);
 		//verts.Add(corner + up + right);
@@ -167,12 +171,23 @@
 		vertices->push_back(vert01);
 		vertices->push_back(vert11);
 		vertices->push_back(vert10);
-		indices->push_back(index + 0);
-		indices->push_back(index + 1);
-		indices->push_back(index + 2);
-		indices->push_back(index + 2);
-		indices->push_back(index + 3);
-		indices->push_back(index + 0);
+		if (reversed) {
+			indices->push_back(index + 0);
+			indices->push_back(index + 1);
+			indices->push_back(index + 2);
+			indices->push_back(index + 2);
+			indices->push_back(index + 3);
+			indices->push_back(index + 0);
+		}
+		else {
+			indices->push_back(index + 1);
+			indices->push_back(index + 0);
+			indices->push_back(index + 2);
+			indices->push_back(index + 3);
+			indices->push_back(index + 2);
+			indices->push_back(index + 0);
+		}
+		
 	
 	}
 	short Chunk::GetBlockType(int x, int y, int z) {
@@ -296,7 +311,7 @@
 		shader.use();
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(chunkPos.x,0,chunkPos.y));
-		shader.setVec3("lightPos", camPosition);
+		shader.setVec3("lightPos", glm::vec3(chunkPos.x, 0, chunkPos.y)+ glm::vec3(CHUNKWIDTH/2, CHUNKHEIGHT, CHUNKWIDTH/2));
 		shader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 		shader.setVec3("viewPos",camPosition);
 		shader.setMat4("model", model);
@@ -304,5 +319,6 @@
 		shader.setMat4("view", view);
 		chunkMesh.Draw(shader);
 	}
+
 
 

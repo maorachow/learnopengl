@@ -41,6 +41,7 @@ public:
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }*/
+        shader.use();
         glActiveTexture(GL_TEXTURE0 );
         glUniform1i(glad_glGetUniformLocation(shader.ID, "texture1"), 0);
         glBindTexture(GL_TEXTURE_2D, textures[0].id);
@@ -48,11 +49,16 @@ public:
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
       //  glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-
+       
+        
         // always good practice to set everything back to defaults once configured.
         glActiveTexture(GL_TEXTURE0);
+        glBindVertexArray(0);
         //std::cout << "draw" << std::endl;
+    }
+    ~Mesh() {
+        std::vector<unsigned int>().swap(indices);
+        std::vector<Vertex>().swap(vertices);
     }
 private:
     unsigned int VBO, EBO;
@@ -62,7 +68,6 @@ private:
         glGenBuffers(1, &EBO);
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER,VBO);
-       
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
